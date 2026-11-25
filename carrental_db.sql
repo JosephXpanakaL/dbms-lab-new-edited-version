@@ -12,7 +12,8 @@ CREATE TABLE car (
     car_id INT AUTO_INCREMENT PRIMARY KEY,
     model VARCHAR(50),
     reg_no VARCHAR(30),
-    status VARCHAR(20) DEFAULT 'Available'
+    status VARCHAR(20) DEFAULT 'Available',
+    image_path VARCHAR(255) NULL
 );
 
 CREATE TABLE rental (
