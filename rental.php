@@ -12,6 +12,19 @@ if (isset($_POST["submit"])) {
     try {
         $new_cust_name = trim($_POST["new_cust_name"] ?? "");
         $new_car_model = trim($_POST["new_car_model"] ?? "");
+        $car_image_path = null;
+        if ($new_car_model !== "" && isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] !== UPLOAD_ERR_NO_FILE) {
+            if ($_FILES["car_image"]["error"] !== UPLOAD_ERR_OK || $_FILES["car_image"]["size"] > 5242880) throw new Exception("Use a JPG, PNG or WEBP image smaller than 5 MB.");
+            $info = @getimagesize($_FILES["car_image"]["tmp_name"]);
+            $types = ["image/jpeg"=>"jpg", "image/png"=>"png", "image/webp"=>"webp"];
+            $mime = $info["mime"] ?? "";
+            if (!$info || !isset($types[$mime])) throw new Exception("Please upload a JPG, PNG or WEBP image.");
+            $dir = __DIR__ . "/uploads";
+            if (!is_dir($dir) && !mkdir($dir, 0755, true)) throw new Exception("Could not create the uploads folder.");
+            $filename = bin2hex(random_bytes(12)) . "." . $types[$mime];
+            if (!move_uploaded_file($_FILES["car_image"]["tmp_name"], $dir . "/" . $filename)) throw new Exception("Could not save the car image.");
+            $car_image_path = "uploads/" . $filename;
+        }
         // Single combined Licence / Registration No input used for both customer and car
         $shared_no     = strtoupper(trim($_POST["new_licence_reg"] ?? ""));
 
@@ -36,8 +49,8 @@ if (isset($_POST["submit"])) {
                 throw new Exception("Please enter Licence / Registration No for the new car.");
             }
 
-            $stmt_car = mysqli_prepare($conn, "INSERT INTO car (model, reg_no, status) VALUES (?, ?, 'Available')");
-            mysqli_stmt_bind_param($stmt_car, "ss", $new_car_model, $shared_no);
+            $stmt_car = mysqli_prepare($conn, "INSERT INTO car (model, reg_no, status, image_path) VALUES (?, ?, 'Available', ?)");
+            mysqli_stmt_bind_param($stmt_car, "sss", $new_car_model, $shared_no, $car_image_path);
             mysqli_stmt_execute($stmt_car);
             $car_id = mysqli_insert_id($conn);
             mysqli_stmt_close($stmt_car);
@@ -100,13 +113,12 @@ while ($m = mysqli_fetch_assoc($map_res)) {
 }
 ?>
 <!DOCTYPE html>
-<html>
-<head><title>Car Rental</title></head>
-<body>
-<h2>Car Rental Form</h2>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DriveLux | Car Rental</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/app.css"></head>
+<body class="rental-page"><header class="topbar"><a class="brand" href="rental.php"><span class="brand-mark">D</span><span>DRIVE<span class="brand-light">LUX</span><small>RENTAL STUDIO</small></span></a><nav><a class="active" href="rental.php">New booking</a><a href="report.php">Rental reports</a></nav><span class="topbar-tag"><i></i> SYSTEM ONLINE</span></header><main class="page-shell"><section class="hero"><div class="hero-copy"><span class="eyebrow">THE ROAD IS YOURS</span><h1>Every journey<br>starts <em>here.</em></h1><p>A smarter way to manage your fleet, customers and bookings — all in one place.</p><a class="hero-link" href="#booking">Create a booking <b>↘</b></a><div class="hero-stats"><div><strong>01</strong><span>Choose your ride</span></div><div><strong>02</strong><span>Set your dates</span></div><div><strong>03</strong><span>Hit the road</span></div></div></div><div class="hero-visual"><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><span class="hero-label">DRIVE YOUR WAY ✳</span><img class="hero-car" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1500&q=90" alt="Luxury sports car"><span class="hero-caption">DESIGNED FOR THE DRIVE <b>/// 001</b></span></div></section><section class="section-heading" id="booking"><div><span class="eyebrow">BOOKING DESK / 01</span><h2>Make it a <em>great drive.</em></h2><p>Choose from your existing fleet or add a new customer and vehicle.</p></div><span class="step-pill">● LIVE BOOKING</span></section>
+<div class="notice <?php echo $message ? (strpos($message, "successfully") !== false ? "notice-success" : "notice-error") : "notice-empty"; ?>"><?php echo htmlspecialchars($message); ?></div>
 <p><?php echo htmlspecialchars($message); ?></p>
 
-<form method="POST" action="">
+<form method="POST" action="" enctype="multipart/form-data" class="booking-card">
     <h3>Select Existing Customer &amp; Car</h3>
     Customer:
     <select name="customer_id" id="customer_select">
@@ -141,6 +153,8 @@ while ($m = mysqli_fetch_assoc($map_res)) {
     <br><br>
     Car Model:
     <input type="text" name="new_car_model" id="new_car_model">
+    <label class="upload-box" for="car_image"><span class="upload-icon">↥</span><span><strong>Upload this car’s photo</strong><small>JPG, PNG or WEBP · max 5 MB</small></span><input type="file" name="car_image" id="car_image" accept="image/jpeg,image/png,image/webp"></label>
+    <img id="image_preview" class="image-preview" alt="Car preview" hidden>
     <span id="car_id_preview"></span>
     <br><br>
     Licence / Registration No:
@@ -154,8 +168,8 @@ while ($m = mysqli_fetch_assoc($map_res)) {
     <input type="submit" name="submit" value="Submit">
 </form>
 
-<p>Choose existing members from the dropdown OR enter new details above to insert automatically.</p>
-<br><a href="report.php">View Rental Report</a>
+<p class="form-footnote">Choose an existing customer and car, or enter new details above. IDs are generated automatically.</p>
+<footer class="site-footer"><span>DRIVELUX © 2026</span><span>BUILT FOR BETTER JOURNEYS ✳</span><a href="report.php">Explore rental reports ↗</a></footer>
 
 <script>
 const customerCarMap = <?php echo json_encode($cust_car_map); ?>;
@@ -170,6 +184,9 @@ const custIdPreview  = document.getElementById("cust_id_preview");
 const newCarModel    = document.getElementById("new_car_model");
 const carIdPreview   = document.getElementById("car_id_preview");
 const newLicenceReg  = document.getElementById("new_licence_reg");
+const imageInput = document.getElementById("car_image");
+const imagePreview = document.getElementById("image_preview");
+imageInput.addEventListener("change", function () { const file = this.files[0]; if (!file) { imagePreview.hidden = true; return; } imagePreview.src = URL.createObjectURL(file); imagePreview.hidden = false; });
 
 // Automatically capitalize Licence / Registration No while typing
 newLicenceReg.addEventListener("input", function() {
