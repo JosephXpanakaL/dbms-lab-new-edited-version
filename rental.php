@@ -13,6 +13,7 @@ if (isset($_POST["submit"])) {
         $new_cust_name = trim($_POST["new_cust_name"] ?? "");
         $new_car_model = trim($_POST["new_car_model"] ?? "");
         $car_image_path = null;
+        if ($new_car_model !== "" && (!isset($_FILES["car_image"]) || $_FILES["car_image"]["error"] === UPLOAD_ERR_NO_FILE)) throw new Exception("Please upload a photo for the new car.");
         if ($new_car_model !== "" && isset($_FILES["car_image"]) && $_FILES["car_image"]["error"] !== UPLOAD_ERR_NO_FILE) {
             if ($_FILES["car_image"]["error"] !== UPLOAD_ERR_OK || $_FILES["car_image"]["size"] > 5242880) throw new Exception("Use a JPG, PNG or WEBP image smaller than 5 MB.");
             $info = @getimagesize($_FILES["car_image"]["tmp_name"]);
@@ -184,6 +185,7 @@ const carIdPreview   = document.getElementById("car_id_preview");
 const newLicenceReg  = document.getElementById("new_licence_reg");
 const imageInput = document.getElementById("car_image");
 const imagePreview = document.getElementById("image_preview");
+newCarModel.addEventListener("input", function () { imageInput.required = this.value.trim().length > 0; });
 imageInput.addEventListener("change", function () { const file = this.files[0]; if (!file) { imagePreview.hidden = true; return; } imagePreview.src = URL.createObjectURL(file); imagePreview.hidden = false; });
 
 // Automatically capitalize Licence / Registration No while typing
