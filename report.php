@@ -28,7 +28,7 @@ if (!empty($to_date)) {
 $where_sql = count($conditions) > 0 ? " WHERE " . implode(" AND ", $conditions) : "";
 
 $sql = "SELECT rental.rental_id, customer.customer_id, customer.name, customer.licence_no, customer.phone,
-               car.model, car.reg_no, car.status, rental.start_date, rental.end_date,
+               car.model, car.reg_no, car.status, car.image_path, rental.start_date, rental.end_date,
                (DATEDIFF(rental.end_date, rental.start_date) + 1) AS total_days
         FROM rental
         INNER JOIN customer ON rental.customer_id = customer.customer_id
@@ -46,12 +46,10 @@ $result = mysqli_stmt_get_result($stmt);
 $customers = mysqli_query($conn, "SELECT customer_id, name FROM customer ORDER BY customer_id ASC");
 ?>
 <!DOCTYPE html>
-<html>
-<head><title>Rental Report</title></head>
-<body>
-<h2>Car Rental Report</h2>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DriveLux | Rental Reports</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/app.css"></head>
+<body><header class="topbar"><a class="brand" href="rental.php"><span class="brand-mark">D</span><span>DRIVE<span class="brand-light">LUX</span><small>RENTAL STUDIO</small></span></a><nav><a href="rental.php">New booking</a><a class="active" href="report.php">Rental reports</a></nav><span class="topbar-tag"><i></i> SYSTEM ONLINE</span></header><main class="page-shell report-shell"><div class="report-heading"><div><span class="eyebrow">FLEET OVERVIEW / 02</span><h1>Rental <em style="color:#8da832">insights.</em></h1><p>Review bookings, customer details and vehicle activity in one place.</p></div><a class="back-link" href="rental.php">＋ New booking</a></div>
 
-<form method="GET" action="">
+<form method="GET" action="" class="filter-card">
     Select Report:
     <select name="customer_id" onchange="this.form.submit()">
         <option value="all" <?php if ($selected_customer === "all") echo "selected"; ?>>All Customers Report</option>
@@ -69,16 +67,17 @@ $customers = mysqli_query($conn, "SELECT customer_id, name FROM customer ORDER B
 </form>
 <br>
 
-Search: <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Type to search...">
+<div class="search-wrap"><input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search customers, cars or registration..."></div>
 <br><br>
 
-<table border="1" cellpadding="8" id="reportTable">
+<div class="table-card"><table class="report-table" id="reportTable">
 <tr>
     <th>Rental ID</th>
     <th>Customer ID</th>
     <th>Customer Name</th>
     <th>Licence No</th>
     <th>Phone</th>
+    <th>Vehicle</th>
     <th>Car Model</th>
     <th>Registration No</th>
     <th>Status</th>
@@ -94,6 +93,7 @@ Search: <input type="text" id="searchInput" onkeyup="filterTable()" placeholder=
         <td><?php echo htmlspecialchars($row["name"]); ?></td>
         <td><?php echo htmlspecialchars($row["licence_no"]); ?></td>
         <td><?php echo htmlspecialchars($row["phone"]); ?></td>
+        <td><?php if (!empty($row["image_path"]) && file_exists(__DIR__ . "/" . $row["image_path"])) { ?><img src="<?php echo htmlspecialchars($row["image_path"]); ?>" alt="Car"><?php } else { ?><span class="status-pill">NO PHOTO</span><?php } ?></td>
         <td><?php echo htmlspecialchars($row["model"]); ?></td>
         <td><?php echo htmlspecialchars($row["reg_no"]); ?></td>
         <td><?php echo htmlspecialchars($row["status"]); ?></td>
@@ -103,11 +103,10 @@ Search: <input type="text" id="searchInput" onkeyup="filterTable()" placeholder=
     </tr>
     <?php } ?>
 <?php } else { ?>
-    <tr><td colspan="11">No records found.</td></tr>
+    <tr><td colspan="12">No records found.</td></tr>
 <?php } ?>
-</table>
-
-<br><a href="rental.php">Back to Rental Form</a>
+</table></div>
+<footer class="report-footer"><span>DRIVELUX © 2026</span><a href="rental.php">← Back to booking desk</a></footer></main>
 
 <script>
 function filterTable() {
