@@ -18,7 +18,7 @@ Database: carrental_db
 
 ## DriveLux interface upgrade
 - Responsive car-rental interface with a car-led homepage, subtle 3D hover treatment and refreshed booking/report pages.
-- New car entries can optionally include a JPG, PNG or WEBP photo (maximum 5 MB). The image path is stored with the car and displayed in rental reports.
+- Every new car entry requires a JPG, PNG or WEBP photo (maximum 5 MB). The image path is stored with the car and displayed in rental reports.
 - Existing customer, car and rental tables, IDs, fields, joins and foreign-key relationships are retained; `image_path` is an additional nullable car field.
 
 ## Database update
