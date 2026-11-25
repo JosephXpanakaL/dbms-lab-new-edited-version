@@ -116,8 +116,6 @@ while ($m = mysqli_fetch_assoc($map_res)) {
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DriveLux | Car Rental</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/app.css"></head>
 <body class="rental-page"><header class="topbar"><a class="brand" href="rental.php"><span class="brand-mark">D</span><span>DRIVE<span class="brand-light">LUX</span><small>RENTAL STUDIO</small></span></a><nav><a class="active" href="rental.php">New booking</a><a href="report.php">Rental reports</a></nav><span class="topbar-tag"><i></i> SYSTEM ONLINE</span></header><main class="page-shell"><section class="hero"><div class="hero-copy"><span class="eyebrow">THE ROAD IS YOURS</span><h1>Every journey<br>starts <em>here.</em></h1><p>A smarter way to manage your fleet, customers and bookings — all in one place.</p><a class="hero-link" href="#booking">Create a booking <b>↘</b></a><div class="hero-stats"><div><strong>01</strong><span>Choose your ride</span></div><div><strong>02</strong><span>Set your dates</span></div><div><strong>03</strong><span>Hit the road</span></div></div></div><div class="hero-visual"><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><span class="hero-label">DRIVE YOUR WAY ✳</span><img class="hero-car" src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1500&q=90" alt="Luxury sports car"><span class="hero-caption">DESIGNED FOR THE DRIVE <b>/// 001</b></span></div></section><section class="section-heading" id="booking"><div><span class="eyebrow">BOOKING DESK / 01</span><h2>Make it a <em>great drive.</em></h2><p>Choose from your existing fleet or add a new customer and vehicle.</p></div><span class="step-pill">● LIVE BOOKING</span></section>
 <div class="notice <?php echo $message ? (strpos($message, "successfully") !== false ? "notice-success" : "notice-error") : "notice-empty"; ?>"><?php echo htmlspecialchars($message); ?></div>
-<p><?php echo htmlspecialchars($message); ?></p>
-
 <form method="POST" action="" enctype="multipart/form-data" class="booking-card">
     <h3>Select Existing Customer &amp; Car</h3>
     Customer:
@@ -169,7 +167,7 @@ while ($m = mysqli_fetch_assoc($map_res)) {
 </form>
 
 <p class="form-footnote">Choose an existing customer and car, or enter new details above. IDs are generated automatically.</p>
-<footer class="site-footer"><span>DRIVELUX © 2026</span><span>BUILT FOR BETTER JOURNEYS ✳</span><a href="report.php">Explore rental reports ↗</a></footer>
+<footer class="site-footer"><span>DRIVELUX © 2026</span><span>BUILT FOR BETTER JOURNEYS ✳</span><a href="report.php">Explore rental reports ↗</a></footer></main>
 
 <script>
 const customerCarMap = <?php echo json_encode($cust_car_map); ?>;
